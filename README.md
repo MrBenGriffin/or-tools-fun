@@ -80,10 +80,6 @@ This will generate obj/mtl 3D 'Wavefront' files of the solution.
 ![Packed](polycube/packed.jpg)
 
 
-
-
-
-
 #### Digraph Solver
 This uses just one single constraint! AddCircuit()
 
