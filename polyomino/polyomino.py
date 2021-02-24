@@ -37,7 +37,7 @@ If successful, it returns a box drawing of the result, e.g. for a 3x20 grid with
 from ortools.sat.python import cp_model
 
 
-class SolvePolyominoPuzzle:
+class PolyominoPuzzleSolver:
     def __init__(self):
         self.allow_gaps = False
         self.maximising = False
@@ -248,7 +248,6 @@ class ShapeCollection:
             for i, fix in enumerate(restrict.values()):
                 self.lib[(k, i)] = fix
 
-
 class PentominoSet(ShapeCollection):
     """
      A pentomino is a polyomino with exactly 5 squares
@@ -277,10 +276,9 @@ class PentominoSet(ShapeCollection):
         }
         super().__init__(pentominoes)
 
-
 def example(space_set):
     shapes = PentominoSet()
-    solver = SolvePolyominoPuzzle()
+    solver = PolyominoPuzzleSolver()
     challenge = {
         'gaps': False,
         'fill': space_set,

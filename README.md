@@ -1,6 +1,4 @@
-###### or-tools
-
-### Examples and Models
+### or-tools: Examples and Models
 
 #### Seating - A Delegate Seating Problem
 _This is the problem that introduced me to **or-tools**._
@@ -21,8 +19,6 @@ So, the constraints are:
 * Each seat can only sit one delegate per session.
 * Each delegate is assigned a maximum of one chair in each session.
 
-
-
 #### Chessboard - legal pieces puzzle
 Given a library of pieces and their moves, 
 and given a requirement of which pieces to use, and how many,
@@ -40,7 +36,6 @@ E.g. find a solution for 6 queens, 2 knights, and maximum (2) kings.
      ■♛■□■□■□
      □■□■♛■□■
      ♚□■□■□■♞
-
 
 #### Polyomino Puzzle Solver
 This solves filling a space with a set of defined polyominoes.
@@ -65,4 +60,16 @@ If successful, it returns a box drawing of the result, e.g. for a 3x20 grid with
     ║ ╔═╝ ╚═╗   ║ ╔═══╦═╝ ╚═╗ ╔═╝ ╔═╣ ╚═══╗ ║
     ║ ╚═╗ ╔═╩═══╩═╩═╗ ╚═══╗ ║ ║ ╔═╝ ╚═══╗ ║ ║
     ╚═══╩═╩═════════╩═════╩═╩═╩═╩═══════╩═╩═╝
+
+#### Polycube Puzzle Solver
+This solves filling a 3D space with a set of defined polycubes.
+It is roughly the same as the polyomino solver, but extended to three dimensions.
+
+A pentacube is a polycube composed of 5 cubes.
+There are 29 distinct three-dimensional pentacubes (Bouwkamp 1981).
+Of these, the 12 planar pentacubes (corresponding to solid pentominoes), are well known.
+Among the non-planar pentacubes, there are five that have at least one plane of symmetry;
+Each of them is its own mirror image. The remaining 12 pentacubes come in mirror image pairs.
+
+This will generate obj/mtl 3D 'Wavefront' files of the solution.
 
