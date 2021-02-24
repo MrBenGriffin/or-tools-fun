@@ -1,5 +1,11 @@
 ## or-tools: Examples and Models
 
+* [A Delegate Seating Problem](#seating---a-delegate-seating-problem)
+* [Chessboard Problem Solver](#chessboard----legal-pieces-puzzle)
+* [Polyomino Puzzle Solver](#polyomino-puzzle-solver)
+* [Polycube Puzzle Solver](#polycube-puzzle-solver)
+* [Digraph Solver](#digraph-solver)
+
 ### Seating - A Delegate Seating Problem
 _This is the problem that introduced me to **or-tools**._
 
@@ -21,7 +27,7 @@ So, the constraints are:
 * Each seat can only sit one delegate per session.
 * Each delegate is assigned a maximum of one chair in each session.
 
-### Chessboard - legal pieces puzzle
+### Chessboard - Legal pieces puzzle
 Given a library of pieces and their moves, 
 and given a requirement of which pieces to use, and how many,
 determine a solution such that no piece can be taken by another.
@@ -80,7 +86,7 @@ This will generate obj/mtl 3D 'Wavefront' files of the solution.
 ![Packed](polycube/packed.jpg)
 
 
-#### Digraph Solver
+### Digraph Solver
 This uses just one single constraint! AddCircuit()
 
 An or-tools example implementing/demonstrating the AddCircuit constraint
