@@ -73,3 +73,12 @@ Each of them is its own mirror image. The remaining 12 pentacubes come in mirror
 
 This will generate obj/mtl 3D 'Wavefront' files of the solution.
 
+![Exploded](polycube/exploded.jpg)
+
+![Packed](polycube/packed.jpg)
+
+
+
+
+
+
