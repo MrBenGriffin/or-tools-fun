@@ -1,6 +1,6 @@
-### or-tools: Examples and Models
+## or-tools: Examples and Models
 
-#### Seating - A Delegate Seating Problem
+### Seating - A Delegate Seating Problem
 _This is the problem that introduced me to **or-tools**._
 
 There is a one day event that covers several named sessions.
@@ -19,7 +19,7 @@ So, the constraints are:
 * Each seat can only sit one delegate per session.
 * Each delegate is assigned a maximum of one chair in each session.
 
-#### Chessboard - legal pieces puzzle
+### Chessboard - legal pieces puzzle
 Given a library of pieces and their moves, 
 and given a requirement of which pieces to use, and how many,
 determine a solution such that no piece can be taken by another.
@@ -37,7 +37,7 @@ E.g. find a solution for 6 queens, 2 knights, and maximum (2) kings.
      □■□■♛■□■
      ♚□■□■□■♞
 
-#### Polyomino Puzzle Solver
+### Polyomino Puzzle Solver
 This solves filling a space with a set of defined polyominoes.
 
 _A polyomino is a plane geometric figure formed by joining one or more equal squares edge to edge.
@@ -61,7 +61,7 @@ If successful, it returns a box drawing of the result, e.g. for a 3x20 grid with
     ║ ╚═╗ ╔═╩═══╩═╩═╗ ╚═══╗ ║ ║ ╔═╝ ╚═══╗ ║ ║
     ╚═══╩═╩═════════╩═════╩═╩═╩═╩═══════╩═╩═╝
 
-#### Polycube Puzzle Solver
+### Polycube Puzzle Solver
 This solves filling a 3D space with a set of defined polycubes.
 It is roughly the same as the polyomino solver, but extended to three dimensions.
 
