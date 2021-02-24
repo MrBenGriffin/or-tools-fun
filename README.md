@@ -1,7 +1,7 @@
 ## or-tools: Examples and Models
 
 * [A Delegate Seating Problem](#seating---a-delegate-seating-problem)
-* [Chessboard Problem Solver](#chessboard----legal-pieces-puzzle)
+* [Chessboard Problem Solver](#chessboard---legal-pieces-puzzle)
 * [Polyomino Puzzle Solver](#polyomino-puzzle-solver)
 * [Polycube Puzzle Solver](#polycube-puzzle-solver)
 * [Digraph Solver](#digraph-solver)
