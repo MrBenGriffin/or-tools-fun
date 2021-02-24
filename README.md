@@ -22,3 +22,23 @@ So, the constraints are:
 * Each delegate is assigned a maximum of one chair in each session.
 
 
+
+#### Chessboard - legal pieces puzzle
+Given a library of pieces and their moves, 
+and given a requirement of which pieces to use, and how many,
+determine a solution such that no piece can be taken by another.
+
+This is an extension of the N-Queens puzzle
+E.g. find a solution for 6 queens, 2 knights, and maximum (2) kings.
+
+````
+ ♞■□■□■□♚
+ ■□■♛■□■□
+ □■□■□■♛■
+ ■□♛□■□■□
+ □■□■□♛□■
+ ■♛■□■□■□
+ □■□■♛■□■
+ ♚□■□■□■♞
+````
+
