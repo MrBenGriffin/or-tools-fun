@@ -31,14 +31,38 @@ determine a solution such that no piece can be taken by another.
 This is an extension of the N-Queens puzzle
 E.g. find a solution for 6 queens, 2 knights, and maximum (2) kings.
 
-````
- ♞■□■□■□♚
- ■□■♛■□■□
- □■□■□■♛■
- ■□♛□■□■□
- □■□■□♛□■
- ■♛■□■□■□
- □■□■♛■□■
- ♚□■□■□■♞
-````
+
+     ♞■□■□■□♚
+     ■□■♛■□■□
+     □■□■□■♛■
+     ■□♛□■□■□
+     □■□■□♛□■
+     ■♛■□■□■□
+     □■□■♛■□■
+     ♚□■□■□■♞
+
+
+#### Polyomino Puzzle Solver
+This solves filling a space with a set of defined polyominoes.
+
+_A polyomino is a plane geometric figure formed by joining one or more equal squares edge to edge.
+It is a polyform whose cells are squares. It may be regarded as a finite subset of the regular square tiling._
+
+This example includes a pentomino class.
+
+A standard pentomino puzzle is to tile a rectangular box with the pentominoes, i.e. cover it without overlap and
+without gaps. Each of the 12 pentominoes has an area of 5 unit squares, so the box must have an area of 60 units.
+Possible sizes that use just one of each pentomino are 6×10, 5×12, 4×15 and 3×20.
+The 6×10 case, first solved in 1960, has exactly 2339 solutions.
+The 5×12 box has 1010 solutions, the 4×15 box has 368 solutions, and the 3×20 box has just 2 solutions
+The 8×8 rectangle with a 2×2 hole in the center has 65 solutions.
+
+This program allows any grid (with arbitrary holes) and allows a variety of shapes to be used to fill it.
+e.g. 10x12 grid, with 8 x 'U' pentominoes and 1 or more 'F'.
+If successful, it returns a box drawing of the result, e.g. for a 3x20 grid with 1 of each pentomino:
+
+    ╔═══╦═╦═════╦═══════╦═╦═════╦═══╦═╦═════╗
+    ║ ╔═╝ ╚═╗   ║ ╔═══╦═╝ ╚═╗ ╔═╝ ╔═╣ ╚═══╗ ║
+    ║ ╚═╗ ╔═╩═══╩═╩═╗ ╚═══╗ ║ ║ ╔═╝ ╚═══╗ ║ ║
+    ╚═══╩═╩═════════╩═════╩═╩═╩═╩═══════╩═╩═╝
 

@@ -51,7 +51,7 @@
 
       So, the constraints are:
         - All organisations must be allocated, and must be sat just once if it has any delegates.
-        - Each tranche has some wiggle room (enforced by a fixed value) to assist in allocation
+        - Each tranche has some wiggle room (enforced by a lib value) to assist in allocation
         - Each organisation can only belong to one tranche
         - The value of an organisation (and therefore it's tranche fill) changes on each session.
         - A tranche value must be less than the count of delegates of each of it's allocated organisations
