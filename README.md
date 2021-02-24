@@ -3,6 +3,8 @@
 #### Seating - A Delegate Seating Problem
 _This is the problem that introduced me to **or-tools**._
 
+This is the sort of problem that I consider to be verging on requiring access to magic.
+
 There is a one day event that covers several named sessions.
 The seating for the event does not change: seats are arranged in named rows of different lengths. 
 
@@ -72,4 +74,81 @@ Among the non-planar pentacubes, there are five that have at least one plane of 
 Each of them is its own mirror image. The remaining 12 pentacubes come in mirror image pairs.
 
 This will generate obj/mtl 3D 'Wavefront' files of the solution.
+
+#### Digraph Solver
+This uses just one single constraint! AddCircuit()
+
+An or-tools example implementing/demonstrating the AddCircuit constraint
+Find path from 'start' to 'stop' through a directed graph (digraph) of nodes and arcs in a given number of steps.
+steps can be a specific number, 'min', or 'max'
+
+The problem codes the digraph as a dict of nodes : a list of the arcs from that node.
+For instance,
+
+```Python
+a: ['o', 'd', 'b', 'y']  # node 'a' has 4 outgoing arcs:  a->o, a->d, a->b, a->y
+```
+
+This example:
+* Generates a random problem with 61 nodes, all but the 'stop' node having 4 outgoing arcs.
+* Prints the problem digraph
+* Solves the minimum and maximum paths.
+* Solves (or fails) for seeking path-lengths from minimum to maximum steps long printing the result.
+
+For instance, using 26 nodes it may produce something like the following:
+
+````text
+a: ['g', 't', 'n', 'w']
+b: ['p', 'g', 'l', 'n']
+c: ['i', 'z', 'o', 'k']
+d: ['y', 'x', 'p', 'z']
+e: ['u', 'f', 'h', 'j']
+f: ['n', 'q', 'l', 'j']
+g: ['r', 'q', 'u', 'b']
+h: ['m', 'v', 's', 'w']
+i: ['p', 'w', 'q', 'v']
+j: ['g', 'f', 'e', 'q']
+k: ['n', 'p', 's', 'c']
+l: ['q', 'n', 'u', 't']
+m: ['d', 'k', 'x', 'r']
+n: ['u', 'l', 'q', 's']
+o: ['z', 'y', 'm', 'h']
+p: ['o', 'x', 'l', 'j']
+q: ['k', 'g', 'm', 'c']
+r: ['n', 'h', 'k', 'j']
+s: ['p', 'm', 'k', 'h']
+t: ['k', 'u', 'i', 'c']
+u: ['b', 's', 'w', 'd']
+v: ['o', 'b', 'd', 'p']
+w: ['l', 'o', 'f', 'e']
+x: ['r', 'j', 'w', 'e']
+y: ['p', 'x', 'h', 'g']
+z: []
+
+a-w-o-z
+a-g-q-c-z
+a-w-l-t-c-z
+a-g-b-l-q-c-z
+a-g-b-p-o-m-d-z
+a-w-o-y-p-l-u-d-z
+a-g-b-p-j-e-h-m-d-z
+a-g-b-p-j-e-h-m-k-c-z
+a-g-b-p-j-e-h-m-k-c-o-z
+a-t-u-d-y-g-b-l-n-s-k-c-z
+a-w-l-t-c-o-y-p-x-r-n-u-d-z
+a-t-u-s-h-v-p-l-n-q-c-i-w-o-z
+a-w-l-t-u-s-p-o-y-x-r-n-q-m-d-z
+a-g-r-h-v-p-l-t-u-b-n-q-c-i-w-o-z
+a-g-r-k-n-q-c-i-w-o-h-v-p-l-t-u-d-z
+a-g-r-j-e-h-v-p-l-t-u-b-n-q-c-i-w-o-z
+a-g-r-j-e-h-v-p-l-t-u-s-k-n-q-c-i-w-o-z
+a-t-k-c-i-w-f-q-m-d-x-j-g-u-b-l-n-s-p-o-z
+a-n-s-m-x-r-j-e-f-q-k-c-i-w-l-t-u-d-y-p-o-z
+a-w-f-q-m-d-x-j-e-u-b-g-r-k-n-l-t-c-i-v-p-o-z
+a-w-l-t-i-v-b-n-s-k-c-o-y-p-x-r-j-e-f-q-g-u-d-z
+a-g-u-d-y-p-j-e-f-q-m-x-r-n-s-h-w-l-t-k-c-i-v-o-z
+a-w-l-t-u-b-g-q-k-c-i-v-o-y-p-x-r-j-e-f-n-s-h-m-d-z
+````
+
+#### That's all for the moment!
 
