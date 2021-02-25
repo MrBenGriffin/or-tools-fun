@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """
+  Simple seating: This manages smaller numbers of delegates.
+  The larger 'split seating' problem can manage thousands.
+
   Delegate Seating Problem
       There is a one day event that covers several named sessions.
       The seating for the event does not change: seats are arranged in named rows of different lengths.
       Company (organisation) delegates should always sit together, and a delegate should not have to switch seats if
-       attending successive sessions.
+      attending consecutive sessions.
       So, the constraints are:
       - Each named delegate belongs to one named organisation.
       - Each delegate will attend at least one session.
@@ -36,7 +39,7 @@
       "rows": { "A": 22, "B": 22, ...}
 
       orgs is a dict of organisations keyed by organisation name.
-      "orgs" { "Amazon": {...}, "Google": {...}, ...}
+     "orgs" { "Amazon": {...}, "Google": {...}, ...}
 
       The dict within each organisation is it's set of delegates, again keyed by name...
       Against each delegate is that delegate's own request for session attendance.
@@ -68,37 +71,12 @@ from ortools.sat.python import cp_model
 # Adjust this to the number of cores you want to allocate.
 workers = 12
 
-def store_row_tranches(data):
-    data['row_tranches'] = [data['rows'].keys()]
-    data['seat_tranches'] = [sum(data['rows'].values())]
-    data['tranche_count'] = 1
-
-def store_tranche_orgs(data):
-    t_range = range(len(data['seat_tranches']))
-    s_range = range(len(data['sessions']))
-    o_range = range(len(data['org_sess_sum']))
-    org_names = list(data['orgs'].keys())
-    data['tranche_orgs'] = []
-    data['tranche_org_seats'] = []
-    for t_idx in t_range:
-        data['tranche_orgs'].append([])
-        data['tranche_org_seats'].append([])
-        for s_idx in s_range:
-            data['tranche_org_seats'][t_idx].append(0)
-            for o_idx in o_range:
-                org = org_names[o_idx]
-                data['tranche_org_seats'][t_idx][s_idx] += data['org_sess_sum'][org][s_idx]
-                if org not in data['tranche_orgs'][t_idx]:
-                    data['tranche_orgs'][t_idx].append(org)
-
-
 def create_data_model(data_model_file: str):
     print("creating data model...")
     with open(data_model_file, 'r') as infile:
         data = json.load(infile)
         sessions = len(data['sessions'])
-        store_row_tranches(data)
-    data['seats_sum'] = sum(data['seat_tranches'])
+    data['seats_sum'] = sum(data['rows'].values())
     data['org_sess_sum'] = {
         org: [
             sum([person[session] for person in data['orgs'][org].values()]) for session in range(sessions)
@@ -106,13 +84,13 @@ def create_data_model(data_model_file: str):
     data['sess_sum'] = [
         sum([data['org_sess_sum'][o_idx][s_idx] for o_idx in data['org_sess_sum']]) for s_idx in range(sessions)
     ]
+    data['orgs_sum'] = len(data['orgs'])
+    data['delegates_sum'] = sum([len(d.keys()) for d in data['orgs'].values()])
     choke_point = max(data['sess_sum'])
-    if max(data['sess_sum']) > data['seats_sum']:
+    if choke_point > data['seats_sum']:
         busy = [data['sessions'][i] for i, x in enumerate(data['sess_sum']) if x == choke_point]
         print(f"Not enough seats ({data['seats_sum']}) for the session requests ({choke_point}) in session(s) {busy}")
         exit(0)
-    store_tranche_orgs(data)
-    data['results'] = {session: {row: [] for row in data['rows']} for session in data['sessions']}
     return data
 
 def store_allocation(data, or_vars, tranche):
@@ -131,8 +109,8 @@ def store_allocation(data, or_vars, tranche):
                 data['result'][s_name][row].append(chair)
 
 
-def allocate(data, tranche_idx):
-    print(f"calculating seating allocation #{tranche_idx}...")
+def allocate(data):
+    print('modelling...')
     model = cp_model.CpModel()
     solver = cp_model.CpSolver()
     solver.parameters.num_search_workers = workers
@@ -177,17 +155,17 @@ def allocate(data, tranche_idx):
                     if o_tuple in org_chairs:
                         chair_list.append(org_chairs[o_tuple])
             if chair_list:
-                model.Add(sum(chair_list) == data['org_sess_sum'][o_idx][s_idx])
+                model.Add(sum(chair_list) == data['org_sess_sum'][o_name][s_idx])
 
             # Organisations must be sat together.
             adjacency_constraint = []
             for r_idx, r_name in enumerate(data['rows']):
-                for c_idx in range(data['rows'][r_name] - data['org_sess_sum'][o_idx][s_idx] + 1):
+                for c_idx in range(data['rows'][r_name] - data['org_sess_sum'][o_name][s_idx] + 1):
                     tmp = model.NewBoolVar('')
                     adjacency_constraint.append(tmp)
                     model.AddBoolAnd(
                         org_chairs[o_idx, s_idx, r_idx, c_idx + i]
-                        for i in range(data['org_sess_sum'][o_idx][s_idx])
+                        for i in range(data['org_sess_sum'][o_name][s_idx])
                     ).OnlyEnforceIf(tmp)
             model.AddBoolOr(adjacency_constraint)
 
@@ -202,23 +180,27 @@ def allocate(data, tranche_idx):
                 if chair_list:
                     model.Add(sum(chair_list) <= 1)
 
+    org_count = data['orgs_sum']
+    del_count = data['delegates_sum']
+    seat_count = data['seats_sum']
+    row_count = len(data['rows'])
+    sess_count = len(data['sessions'])
+
+    print(
+        f'Solving seating for {del_count} delegates (from {org_count} organisations)'
+        f' with {seat_count} seats (in {row_count} rows) across {sess_count} sessions.\n'
+        f'Delegates from the same organisation always sit next to each other.\n'
+        f'Delegates never switch seats if they attend consecutive sessions.\n'
+    )
     status = solver.Solve(model)
     if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         store_allocation(data, del_chairs, solver)
     else:
-        print(f'allocate {tranche_idx} failed\n', solver.ResponseStats())
-
-
-def store_tranche(data, tranche_data):
-    if 'result' in tranche_data:
-        for session in data['sessions']:
-            for row, allocation in tranche_data['result'][session].items():
-                data['results'][session][row] = allocation
+        print(f'allocate failed\n', solver.ResponseStats())
 
 
 def print_solution(data):
-    for session_name, session in sorted(data['results'].items()):
-        # rows_str = ""
+    for session_name, session in sorted(data['result'].items()):
         print(f'\n{session_name}')
         for row, chairs in sorted(session.items()):
             row_str = row + ":"
@@ -228,27 +210,12 @@ def print_solution(data):
                 p_chair = "**" if not chair else chair[:2]
             print(row_str + "| ")
     with open('simple_result.json', 'w') as outfile:
-        json.dump(data['results'], outfile, sort_keys=True)
+        json.dump(data['result'], outfile, sort_keys=True)
 
 
 def main():
     data = create_data_model("simple_model.json")
-    tranches = data['tranche_count']
-    print(f"solving seating for {tranches} tranches.")
-    for tranche_idx in range(tranches):
-        tranche_data = {
-            'sessions': data['sessions'],
-            'rows': {row: data['rows'][row] for row in data['rows'] if row in data['row_tranches'][tranche_idx]},
-            'orgs': {org: data['orgs'][org] for org in data['orgs'] if org in data['tranche_orgs'][tranche_idx]},
-            'org_sess_sum':
-                [data['org_sess_sum'][org] for org in data['orgs'] if org in data['tranche_orgs'][tranche_idx]],
-         }
-        tranche_data['sess_sum'] = [
-            sum(org[s_id] for org in tranche_data['org_sess_sum']) for s_id in range(len(data['sessions']))
-        ]
-        # Now allocate seats!
-        allocate(tranche_data, tranche_idx)
-        store_tranche(data, tranche_data)
+    allocate(data)
     print_solution(data)
 
 

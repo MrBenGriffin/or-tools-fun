@@ -31,6 +31,10 @@ So, the constraints are:
 * Each seat can only sit one delegate per session.
 * Each delegate is assigned a maximum of one chair in each session.
 
+There are two files here - 
+* 'simple_seating' is much easier to read, and deals with a hundred or so delegates.
+* 'split_seating' should be able to manage thousands of delegates.
+
 For example (this is the simple_seating model):
 There are six sessions in the day - named by the time that the session takes place.
 Sessions: ["08:00", "10:00", "12:00", "14:00", "16:00"]

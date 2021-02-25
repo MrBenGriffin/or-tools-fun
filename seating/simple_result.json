@@ -1,1 +1,42 @@
-{"08:00": {"Ra": ["Ogion", "Ogden", "Billy", "Bilal", "Inger", "India", "Lynda", "Lynne"], "Rb": ["Enola", "Enoch", "Jiles"], "Rc": ["Zelma", "Zenta", "Zetta"], "Rd": ["Gusta", "Gunny", "Quinn", "Quint", "Queen", "Soren", "Sofia", "Sofka"], "Re": ["Twink", "Twyla", "Twila", "Rheta", "Rhoda", "Rhona", "Homer", "Holly"], "Rf": ["Polly", "Posie", "Dwane", "Dwain", "Waldo", "Wanda", "Wiley", "Wilma"]}, "10:00": {"Ra": ["Ogion", null, null, "Bilal", null, null, "Lydia", "Lynne"], "Rb": ["Enola", "Jimmy", "Jiles"], "Rc": [null, "Zenta", "Zetta"], "Rd": ["Gusta", "Inell", "Quinn", "Sonja", "Sonya", "Soren", "Solon", "Sofka"], "Re": [null, null, "Twila", "Rheta", "Rhoda", null, "Homer", "Hosea"], "Rf": ["Polly", "Posie", "Dwane", "Dwain", "Waldo", "Wayne", "Wilda", "Wilma"]}, "12:00": {"Ra": ["Ogion", "Ogden", null, "Bilal", "Billy", null, "Lydia", "Lynda"], "Rb": ["Enola", "Ennis", "Wiley"], "Rc": ["Zelma", "Zenta", "Zetta"], "Rd": ["Quint", "Queen", "Quinn", null, "Sofia", "Soren", "Solon", "Sofka"], "Re": [null, "Twink", "Twila", "Rhona", "Rhoda", "Gunny", "Homer", "Holly"], "Rf": ["Polly", "Posie", "Dwane", "Wally", "Wanda", "Wayne", "Inger", "India"]}, "14:00": {"Ra": ["Enoch", "Ogden", "Jimmy", "Bilal", "Billy", "Lynne", "Lydia", "Lynda"], "Rb": [null, "Wilda", "Wiley"], "Rc": ["Zelma", "Zenta", null], "Rd": ["Quint", null, null, null, "Sonya", "Soren", "Solon", "Sofka"], "Re": ["Inell", "Twink", "Twila", "Rhona", "Gusta", "Gunny", "Hosea", "Holly"], "Rf": ["Polly", "Posie", "Waldo", "Wally", "Wanda", "Wayne", null, "Dwain"]}, "16:00": {"Ra": ["Ogion", "Ogden", "Jimmy", "Jiles", "Billy", "Lynne", "Lydia", "Lynda"], "Rb": ["Wilma", "Wilda", "Wiley"], "Rc": ["Zelma", "Zetta", "Twyla"], "Rd": ["Quint", "Quinn", "Queen", "Sonja", "Sonya", "Sofia", "Solon", "Sofka"], "Re": ["Inell", "India", "Rhoda", "Rhona", "Gusta", "Gunny", "Hosea", "Holly"], "Rf": ["Polly", "Enola", "Ennis", "Wally", "Wanda", "Wayne", "Dwane", "Dwain"]}}
+{
+  "08:00": {
+    "Ra": ["Gusta", "Gunny", "Billy", "Bilal", "Dwain", "Dwane", "Lynne", "Lynda"],
+    "Rb": ["Enola", "Enoch", "Jiles"],
+    "Rc": ["Quint", "Queen", "Quinn"],
+    "Rd": ["Ogion", "Ogden", "Fiona", "Filal", "India", "Inger", "Waldo", "Wanda"],
+    "Re": ["Rhona", "Rhoda", "Rheta", "Zenta", "Zetta", "Zelma", "Homer", "Holly"],
+    "Rf": ["Polly", "Posie", "Sofka", "Sofia", "Soren", "Twyla", "Twink", "Twila"]
+  },
+  "10:00": {
+    "Ra": ["Gusta", null, null, "Bilal", "Dwain", "Dwane", "Lynne", "Lydia"],
+    "Rb": ["Enola", "Jimmy", "Jiles"],
+    "Rc": [null, null, "Quinn"],
+    "Rd": ["Ogion", null, "Fiona", "Fidel", null, null, "Waldo", "Wayne"],
+    "Re": ["Inell", "Rhoda", "Rheta", "Zenta", "Zetta", null, "Homer", "Hosea"],
+    "Rf": ["Polly", "Posie", "Sofka", "Sonja", "Soren", "Solon", "Sonya", "Twila"]
+  },
+  "12:00": {
+    "Ra": ["Gunny", null, null, "Bilal", "Billy", "Dwane", "Lynda", "Lydia"],
+    "Rb": ["Enola", "Ennis", "Filal"],
+    "Rc": ["Queen", "Quint", "Quinn"],
+    "Rd": ["Ogion", "Ogden", "Inger", "India", null, "Wally", "Wanda", "Wayne"],
+    "Re": ["Rhona", "Rhoda", "Zelma", "Zenta", "Zetta", null, "Homer", "Holly"],
+    "Rf": ["Polly", "Posie", "Sofka", "Sofia", "Soren", "Solon", "Twink", "Twila"]
+  },
+  "14:00": {
+    "Ra": ["Gunny", "Gusta", "Jimmy", "Bilal", "Billy", "Lynne", "Lynda", "Lydia"],
+    "Rb": [null, "Fidel", "Filal"],
+    "Rc": [null, "Quint", null],
+    "Rd": ["Enoch", "Ogden", "Dwain", null, "Waldo", "Wally", "Wanda", "Wayne"],
+    "Re": ["Rhona", null, "Zelma", "Zenta", "Inell", null, "Hosea", "Holly"],
+    "Rf": ["Polly", "Posie", "Sofka", "Sonya", "Soren", "Solon", "Twink", "Twila"]
+  },
+  "16:00": {
+    "Ra": ["Gunny", "Gusta", "Jimmy", "Jiles", "Billy", "Lynne", "Lynda", "Lydia"],
+    "Rb": ["Fiona", "Fidel", "Filal"],
+    "Rc": ["Quinn", "Quint", "Queen"],
+    "Rd": ["Ogion", "Ogden", "Dwain", "Dwane", "Twyla", "Wally", "Wanda", "Wayne"],
+    "Re": ["Rhona", "Rhoda", "Zelma", "Zetta", "Inell", "India", "Hosea", "Holly"],
+    "Rf": ["Polly", "Sonja", "Sofka", "Sonya", "Sofia", "Solon", "Enola", "Ennis"]
+  }
+}
