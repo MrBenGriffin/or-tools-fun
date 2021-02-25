@@ -9,9 +9,13 @@
 ### Seating - A Delegate Seating Problem
 _This is the problem that introduced me to **or-tools**._
 
-This is the sort of problem that I consider to be verging on requiring access to magic.
+**This was a real world problem - and the solver saved the organisers a fortune in seats.
+It felt like real magic.**
 
-There is a one day event that covers several named sessions.
+The actual event involved seating nearly a thousand delegates. 
+Finding a solution allowed for the organiser to choose the most suitable venue.
+
+There is a one-day event that covers several named sessions.
 The seating for the event does not change: seats are arranged in named rows of different lengths. 
 
 Company (organisation) delegates should always sit together, and a delegate should not have to switch seats if attending successive sessions.
@@ -26,6 +30,78 @@ So, the constraints are:
 * Each delegate will sit in the same place in consecutive sessions.
 * Each seat can only sit one delegate per session.
 * Each delegate is assigned a maximum of one chair in each session.
+
+For example (this is the simple_seating model):
+There are six sessions in the day - named by the time that the session takes place.
+Sessions: ["08:00", "10:00", "12:00", "14:00", "16:00"]
+
+There are 38 seats 5 rows. Because there's a gap in the middle row we treat it as two rows.
+Rows are labeled Ra ... Rf.
+
+    Ra:|_____|_____|_____|_____|_____|_____|_____|_____| 
+    Rb:|_____|_____|_____|        Rc:|_____|_____|_____| 
+    Rd:|_____|_____|_____|_____|_____|_____|_____|_____| 
+    Re:|_____|_____|_____|_____|_____|_____|_____|_____| 
+    Rf:|_____|_____|_____|_____|_____|_____|_____|_____| 
+
+There are 17 organisations, named with a letter: B,D,E,F,G,H,I,J,L,O,P,Q,R,S,T,W,Z
+There are 49 delegates, and coincidentally the delegates' names start with the same letter as the organisation they represent.
+For instance, the delegates from 'W' are named Waldo, Wally, Wanda, and Wayne.
+
+**You may have noticed that there are more delegates than seats - that's because few delegates attend every session.**
+
+Each delegate has selected which sessions she/he have decided to attend.
+We store their decision against their name in the organisation.
+So, in schedule for 'W', Waldo will attend the 8:00, 10:00, and 14:00 sessions.
+
+        "W":
+        {
+            "Waldo": [1, 1, 0, 1, 0],
+            "Wally": [0, 0, 1, 1, 1],
+            "Wanda": [1, 0, 1, 1, 1],
+            "Wayne": [0, 1, 1, 1, 1]
+        },
+
+The full data for this example is in the 'simple_model.json'
+Here is one possible result. Note that while the 08:00 and the 16:00 
+sessions are filled many of the delegates are different, but
+no delegate moves seats when attending adjacent sessions. 
+
+    08:00
+    Ra:|Ogion Ogden|Billy Bilal|Inger India|Lynda Lynne| 
+    Rb:|Enola Enoch|Jiles|        Rc:|Zelma Zenta Zetta| 
+    Rd:|Gusta Gunny|Quinn Quint Queen|Soren Sofia Sofka| 
+    Re:|Twink Twyla Twila|Rheta Rhoda Rhona|Homer Holly| 
+    Rf:|Polly Posie|Dwane Dwain|Waldo Wanda|Wiley Wilma| 
+    
+    10:00
+    Ra:|Ogion|_____|_____|Bilal|_____|_____|Lydia Lynne| 
+    Rb:|Enola|Jimmy Jiles|        Rc:|_____|Zenta Zetta| 
+    Rd:|Gusta|Inell|Quinn|Sonja Sonya Soren Solon Sofka| 
+    Re:|_____|_____|Twila|Rheta Rhoda|_____|Homer Hosea| 
+    Rf:|Polly Posie|Dwane Dwain|Waldo Wayne|Wilda Wilma| 
+    
+    12:00
+    Ra:|Ogion Ogden|_____|Bilal Billy|_____|Lydia Lynda| 
+    Rb:|Enola Ennis|Wiley|        Rc:|Zelma Zenta Zetta| 
+    Rd:|Quint Queen Quinn|_____|Sofia Soren Solon Sofka| 
+    Re:|_____|Twink Twila|Rhona Rhoda|Gunny|Homer Holly| 
+    Rf:|Polly Posie|Dwane|Wally Wanda Wayne|Inger India| 
+    
+    14:00
+    Ra:|Enoch|Ogden|Jimmy|Bilal Billy|Lynne Lydia Lynda| 
+    Rb:|_____|Wilda Wiley|        Rc:|Zelma Zenta|_____| 
+    Rd:|Quint|_____|_____|_____|Sonya Soren Solon Sofka| 
+    Re:|Inell|Twink Twila|Rhona|Gusta Gunny|Hosea Holly| 
+    Rf:|Polly Posie|Waldo Wally Wanda Wayne|_____|Dwain| 
+    
+    16:00
+    Ra:|Ogion Ogden|Jimmy Jiles|Billy|Lynne Lydia Lynda| 
+    Rb:|Wilma Wilda Wiley|        Rc:|Zelma Zetta|Twyla| 
+    Rd:|Quint Quinn Queen|Sonja Sonya Sofia Solon Sofka| 
+    Re:|Inell India|Rhoda Rhona|Gusta Gunny|Hosea Holly| 
+    Rf:|Polly|Enola Ennis|Wally Wanda Wayne|Dwane Dwain| 
+
 
 ### Chessboard - Legal pieces puzzle
 Given a library of pieces and their moves, 
