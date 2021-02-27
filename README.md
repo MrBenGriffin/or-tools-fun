@@ -5,6 +5,7 @@
 * [Polyomino Puzzle Solver](#polyomino-puzzle-solver)
 * [Polycube Puzzle Solver](#polycube-puzzle-solver)
 * [Digraph Solver](#digraph-solver)
+* [Maze Solver](#maze-solver)
 
 ### Seating - A Delegate Seating Problem
 _This is the problem that introduced me to **or-tools**._
@@ -18,7 +19,7 @@ Finding a solution allowed for the organiser to choose the most suitable venue.
 There is a one-day event that covers several named sessions.
 The seating for the event does not change: seats are arranged in named rows of different lengths. 
 
-Company (organisation) delegates should always sit together, and a delegate should not have to switch seats if attending successive sessions.
+Company (organisation) delegates should always sit together, and a delegate should not have to switch seats if attending consecutive sessions.
 
 What makes this more complex than e.g. a wedding planner is that delegates do not go to all sessions.
 
@@ -39,7 +40,7 @@ For example (this is the simple_seating model):
 There are six sessions in the day - named by the time that the session takes place.
 Sessions: ["08:00", "10:00", "12:00", "14:00", "16:00"]
 
-There are 38 seats 5 rows. Because there's a gap in the middle row we treat it as two rows.
+There are 38 seats across 5 rows. Because there's a gap in one row we treat it as two rows.
 Rows are labeled Ra ... Rf.
 
     Ra:|_____|_____|_____|_____|_____|_____|_____|_____| 
@@ -56,7 +57,7 @@ For instance, the delegates from 'W' are named Waldo, Wally, Wanda, and Wayne.
 
 Each delegate has selected which sessions she/he have decided to attend.
 We store their decision against their name in the organisation.
-So, in schedule for 'W', Waldo will attend the 8:00, 10:00, and 14:00 sessions.
+So, in the schedule for 'W', we see Waldo will attend the 8:00, 10:00, and 14:00 sessions.
 
         "W":
         {
@@ -68,8 +69,8 @@ So, in schedule for 'W', Waldo will attend the 8:00, 10:00, and 14:00 sessions.
 
 The full data for this example is in the 'simple_model.json'
 Here is one possible result. Note that while the 08:00 and the 16:00 
-sessions are filled many of the delegates are different, but
-no delegate moves seats when attending adjacent sessions. 
+sessions are filled, many of the delegates are different, but
+no delegate moves seats when attending consecutive sessions. 
 
     08:00
     Ra:|Ogion Ogden|Billy Bilal|Inger India|Lynda Lynne| 
@@ -239,6 +240,56 @@ a-w-f-q-m-d-x-j-e-u-b-g-r-k-n-l-t-c-i-v-p-o-z
 a-w-l-t-i-v-b-n-s-k-c-o-y-p-x-r-j-e-f-q-g-u-d-z
 a-g-u-d-y-p-j-e-f-q-m-x-r-n-s-h-w-l-t-k-c-i-v-o-z
 a-w-l-t-u-b-g-q-k-c-i-v-o-y-p-x-r-j-e-f-n-s-h-m-d-z
+````
+
+### Maze Solver
+This is actually just an extension of the digraph solver above, but looks more pretty!
+Here we generate a random 2D maze, and then we attempt to solve it.
+
+This competes well against a naive wall-crawling (always keep a wall to my right) automaton.
+
+````
+┏━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━┳━┳━━━━━━━━━━━━━━━┳━━━┳━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━┳━━━━━┳━━━━━┳━━━━━━━━━━━┓
+┃o. . .   ┃ . . ┃   . ┃       ┃ ┃               ┃   ┃   ┃     ┃                   ┃         ┃   ┃   . ┃     ┃           ┃
+┃ ┏━┳━╸.╺━┛.┏━┓.┣━╸.╻.┗━━━╸ ╻ ╹ ╹ ┏━╸ ┏━━━━━╸ ╻ ┗━┓ ┃ ╻ ┃ ┏━━━┫ ╺━┳━╸ ┏━━━━━━━━━┳━┛ ┏━┓ ┏━━━┛ ┏━┻━╸.╻.┃ ╺━━━┛ ┏━━━┓ ╻ ╺━┫
+┃ ┃ ┃   . . ┃ ┃ ┃ . ┃ .     ┃     ┃   ┃       ┃   ┃ ┃ ┃ ┃ ┃   ┃   ┃   ┃         ┃   ┃ ┃ ┃     ┃ . . ┃ ┃       ┃ . ┃ ┃   ┃
+┃ ╹ ┃ ╻ ╺━┳━┫ ┃.╹.┏━┻━╸.┏━━━┻━━━━━┫ ┏━┫ ╺━━━━━╋━╸ ╹ ┣━┛ ┃ ╹ ╻ ┗━╸ ┣━━━┛ ┏━━━━━━━╋━╸ ┃ ┃ ╹ ┏━━━┛.┏━━━┛.┣━━━━━━━┛.╻.┃ ┗━┓ ┃
+┃   ┃ ┃   ┃ ┃ ┃ . ┃     ┃         ┃ ┃ ┃       ┃     ┃   ┃   ┃     ┃     ┃       ┃   ┃ ┃   ┃   . ┃ . . ┃ . . . . ┃ ┃   ┃ ┃
+┣━╸ ┃ ┗━┓ ┃ ┃ ┗━┳━┻━━━╸.┃ ╺━┓ ╻ ┏━┛ ┃ ┗━━━┓ ╻ ┣━━━┳━┛ ┏━┛ ┏━┫ ┏━━━┫ ┏━━━┛ ┏━━━┳━┛ ┏━┛ ┗━━━┻━┓.╻ ┃.╺━┳━┛.┏━━━┳━━━┛.┣━╸ ┃ ┃
+┃   ┃   ┃ ┃ ┃   ┃ . . . ┃   ┃ ┃ ┃   ┃     ┃ ┃ ┃   ┃   ┃   ┃ ┃ ┃   ┃ ┃     ┃   ┃   ┃   . . . ┃ ┃ ┃ . ┃   ┃   ┃ . . ┃   ┃ ┃
+┃ ╺━╋━┓ ┃ ┃ ┗━┓ ┃.╺━━━━━┻━━━┫ ┗━┻━╸ ┃ ╺━┓ ╹ ┃ ╹ ╻ ╹ ┏━┛ ┏━┫ ╹ ┣━╸ ╹ ┣━━━╸ ┃ ╻ ╹ ┏━┻━┓.╺━━━┓.╹.┃ ┗━┓.┗━┓.┗━┓ ┃.╺━┳━┻━━━┛ ┃
+┃   ┃ ┃ ┃ ┃   ┃ ┃ . . . . . ┃       ┃   ┃   ┃   ┃   ┃   ┃ ┃   ┃     ┃     ┃ ┃   ┃ . ┃     ┃ . ┃   ┃ . ┃ . ┃ ┃ . ┃ . . . ┃
+┃ ╻ ╹ ┃ ┃ ┗━╸ ┃ ┣━━━━━━━━━╸.┗━┓ ╺━┳━┻━┓ ┣━━━┻━┳━┻━┳━┫ ╻ ╹ ┃ ╺━┛ ┏━┓ ╹ ┏━╸ ╹ ┣━╸ ┃.╻.╹.╻ ╻ ┃ ┏━┛ ┏━┻━╸.┗━╸.┃ ┗━┓.┃.┏━┳━╸.┃
+┃ ┃   ┃ ┃     ┃ ┃           . ┃   ┃   ┃ ┃     ┃   ┃ ┃ ┃   ┃     ┃ ┃   ┃     ┃   ┃ ┃ . ┃ ┃ ┃ ┃   ┃     . . ┃   ┃ ┃ ┃ ┃ . ┃
+┃ ┃ ╺━┛ ┃ ┏━━━┛ ┃ ╺━━━┓ ╺━┳━┓.┗━┓ ╹ ╻ ┃ ╹ ┏━╸ ┗━┓ ┃ ┃ ┗━┳━┻━━━┳━┛ ╹ ┏━┻━━━━━┻━━━┛.┗━━━╋━┛ ┃ ┃ ┏━┛ ┏━━━┳━━━┫ ╻ ┃.┃.┃ ┃.╺━┫
+┃ ┃     ┃ ┃     ┃     ┃   ┃ ┃ . ┃   ┃ ┃   ┃     ┃ ┃ ┃   ┃     ┃     ┃ . . . . . .     ┃   ┃ ┃ ┃   ┃   ┃   ┃ ┃ ┃ ┃ ┃ ┃ . ┃
+┃ ┗━┳━━━┛ ┃ ┏━━━┻━┓ ╻ ┃ ╺━┫ ┗━┓.┣━╸ ┣━┻━━━┻━━━┓ ╹ ╹ ┣━╸ ┗━━━┓ ┃ ╺━┳━┛.┏━━━━━┳━━━━━┳━━━╋━━━┛ ┃ ┗━┓ ┃ ╻ ┃ ╻ ┃ ┗━┛.┃.┃ ┗━╸.┃
+┃   ┃     ┃ ┃     ┃ ┃ ┃   ┃   ┃ ┃   ┃ . . . . ┃     ┃       ┃ ┃   ┃ . ┃     ┃     ┃   ┃     ┃   ┃ ┃ ┃ ┃ ┃ ┃   . ┃ ┃ . . ┃
+┣━╸ ┃ ╺━━━┫ ┃ ╻ ┏━┫ ┃ ┗━━━┫ ╻ ┃.┗━━━┛.┏━╸ ┏━╸.┣━━━━━┛ ┏━╸ ╻ ┃ ┗━╸ ┃.╺━┫ ╻ ╻ ┗━┓ ╺━┫ ┏━┛ ┏━━━┫ ╻ ┗━┛ ┃ ┃ ┣━┻━┓.╺━┛.┃.┏━━━┫
+┃   ┃     ┃ ┃ ┃ ┃ ┃ ┃     ┃ ┃ ┃ . . . ┃   ┃ . ┃       ┃   ┃ ┃     ┃ . ┃ ┃ ┃   ┃   ┃ ┃   ┃   ┃ ┃     ┃ ┃ ┃   ┃ . . ┃ ┃   ┃
+┃ ╻ ┗━┳━┓ ╹ ┃ ┃ ┃ ╹ ┗━━━┓ ┗━┛ ┣━╸ ┏━━━┻━╸ ┃.╺━┫ ┏━━━━━┛ ┏━┛ ┃ ┏━━━╋━┓.╹ ┃ ┗━┓ ┗━╸ ┃ ┃ ╺━┛ ┏━┛ ┣━━━━━┫ ┃ ┃ ╻ ┗━━━━━┛.┃ ╻ ┃
+┃ ┃   ┃ ┃   ┃ ┃ ┃       ┃     ┃   ┃       ┃ . ┃ ┃       ┃   ┃ ┃   ┃ ┃ . ┃   ┃     ┃ ┃     ┃   ┃     ┃ ┃ ┃ ┃   . . . ┃ ┃ ┃
+┃ ┗━┓ ┃ ┗━┓ ┗━┫ ┗━┳━━━╸ ┗━━━┓ ┗━━━┻━┳━━━━━┛ ╻.┗━┫ ┏━━━━━┫ ╺━┫ ╹ ╻ ╹ ┣━┓.┣━╸ ┗━━━━━┛ ┃ ┏━━━┫ ┏━┛ ╻ ╺━┫ ┃ ╹ ┣━╸.╺━┳━━━┛ ┗━┫
+┃   ┃ ┃   ┃   ┃   ┃         ┃       ┃       ┃ . ┃ ┃     ┃   ┃   ┃   ┃ ┃ ┃           ┃ ┃   ┃ ┃   ┃   ┃ ┃   ┃   . ┃       ┃
+┣━━━┫ ┃ ╺━┻━┓ ┗━┓ ┃ ┏━━━━━┳━┻━━━━━╸ ┃ ┏━━━┳━╋━╸.┃ ┗━━━╸ ┣━╸ ┣━━━┻━┓ ╹ ┃.┗━━━┳━━━━━━━┫ ┃ ╺━┫ ┃ ┏━┻━┓ ┗━╋━━━┻━━━┓.┣━━━┓ ╻ ┃
+┃   ┃ ┃     ┃   ┃ ┃ ┃     ┃         ┃ ┃   ┃ ┃ . ┃       ┃ . ┃ . . ┃   ┃ . . ┃       ┃ ┃   ┃ ┃ ┃   ┃   ┃       ┃ ┃ . ┃ ┃ ┃
+┃ ╻ ╹ ┃ ╻ ╺━┻━┓ ╹ ┃ ┃ ╺━━━┛ ╻ ┏━━━┳━┛ ┃ ╻ ┃ ╹.╺━┻━┳━┳━╸ ┃.╻.╹.┏━╸.┣━━━┻━━━╸.┣━━━┓ ╻ ┃ ┗━┓ ┃ ┣━┛ ╻ ┃ ╻ ┃ ┏━━━┓ ┃.┃.╻.┗━┫ ┃
+┃ ┃   ┃ ┃     ┃   ┃ ┃       ┃ ┃   ┃   ┃ ┃ ┃   . . ┃ ┃   ┃ ┃ . ┃ . ┃ . . . . ┃   ┃ ┃ ┃   ┃ ┃ ┃   ┃ ┃ ┃ ┃ ┃   ┃ ┃ ┃ ┃ . ┃ ┃
+┃ ┗━┳━┛ ┣━╸ ╻ ┣━┳━┫ ┣━━━┳━━━┛ ┃ ╻ ╹ ┏━┛ ┃ ┗━━━━━┓.┃ ┗━━━┫.┗━┳━┫.╺━┛.┏━━━━━━━┻━╸ ┃ ┃ ┗━╸ ┃ ╹ ╹ ┏━┫ ╹ ┃ ┃ ┃ ╻ ┃ ╹.╹.┣━┓.┃ ┃
+┃   ┃   ┃   ┃ ┃ ┃ ┃ ┃   ┃     ┃ ┃   ┃   ┃       ┃ ┃     ┃ . ┃ ┃ . . ┃           ┃ ┃     ┃     ┃ ┃   ┃ ┃ ┃ ┃ ┃   . ┃ ┃ ┃ ┃
+┣━━━┫ ┏━┛ ┏━┫ ┃ ┃ ┃ ╹ ╻ ┃ ╺━━━┫ ┣━━━┫ ╺━╋━━━━━━━┫.┣━━━╸ ┣━╸.╹ ┗━┳━┳━┻━━━╸ ╺━┳━━━┛ ┣━┳━━━┻━━━━━┫ ┣━━━┛ ┃ ┃ ┣━┻━━━┳━┛ ╹.┃ ┃
+┃   ┃ ┃   ┃ ┃ ┃ ┃ ┃   ┃ ┃     ┃ ┃   ┃   ┃ .     ┃ ┃     ┃ .     ┃ ┃         ┃     ┃ ┃         ┃ ┃     ┃ ┃ ┃     ┃ . . ┃ ┃
+┃ ╻ ┗━┛ ┏━┛ ╹ ┃ ┃ ┗━━━┫ ┃ ┏━━━┫ ╹ ╻ ┗━╸ ┃.╻.╺━━━┛.┃ ┏━╸ ┃.╺━━━┓ ╹ ┃ ╻ ┏━━━┓ ┃ ╺━━━┛ ┃ ┏━━━━━┓ ┃ ╹ ┏━━━┛ ┃ ┃ ┏━┓ ┃.╺━┳━┛ ┃
+┃ ┃     ┃     ┃ ┃     ┃ ┃ ┃   ┃   ┃     ┃ ┃ . . . ┃ ┃   ┃ . . ┃   ┃ ┃ ┃   ┃ ┃       ┃ ┃     ┃ ┃   ┃     ┃ ┃ ┃ ┃ ┃ . ┃   ┃
+┃ ┗━━━━━┻━┓ ╺━┫ ┗━━━┓ ╹ ┗━┛ ╻ ┣━━━╋━━━━━┛.┣━━━┓ ╺━┛ ┣━━━┻━━━╸.┣━━━╋━┛ ┣━┓ ┃ ┗━━━┳━━━┫ ┗━━━╸ ┃ ┗━┳━┛ ┏━━━┛ ╹ ┃ ┣━┻━╸.┃ ╺━┫
+┃         ┃   ┃     ┃       ┃ ┃   ┃ . . . ┃ . ┃     ┃ . . . . ┃   ┃   ┃ ┃ ┃     ┃   ┃       ┃   ┃   ┃       ┃ ┃ . . ┃   ┃
+┣━━━━━━━┓ ┣━╸ ┣━━━┓ ┗━━━━━━━┫ ┗━┓ ┃.┏━━━━━┛.╻.┗━┳━━━┛.┏━┓ ╺━━━┫ ╻ ╹ ╺━┛ ┃ ┗━━━━━┛ ╻ ┣━━━━━╸ ┣━┓ ┃ ╺━┻━━━╸ ┏━┛ ┃.┏━━━┫ ╻ ┃
+┃       ┃ ┃   ┃   ┃         ┃   ┃ ┃ ┃ . . . ┃ . ┃ . . ┃ ┃     ┃ ┃       ┃         ┃ ┃       ┃ ┃ ┃         ┃   ┃ ┃   ┃ ┃ ┃
+┃ ╻ ╺━━━┫ ┃ ┏━┛ ╻ ┗━┓ ╺━━━━━┻━┓ ┃ ┃.┃.╺━┳━┓ ┣━┓.┃.╺━━━┫ ┣━━━┓ ┃ ┗━━━━━━━┛ ┏━━━━━┓ ┃ ┃ ┏━━━━━┛ ┃ ┣━━━┳━━━┳━┛ ╺━┛.┗━┓ ╹ ┃ ┃
+┃ ┃     ┃ ┃ ┃   ┃   ┃         ┃ ┃ ┃ ┃ . ┃ ┃ ┃ ┃ ┃ . . ┃ ┃   ┃ ┃           ┃     ┃ ┃ ┃ ┃       ┃ ┃   ┃   ┃       . ┃   ┃ ┃
+┃ ┗━━━┓ ╹ ┗━┛ ╺━┻━┓ ╹ ╺━━━┳━╸ ╹ ┃ ╹.┗━╸.┃ ╹ ╹ ┃.┗━━━╸.┃ ╹ ╻ ╹ ┗━━━━━━━━━╸ ┃ ╺━━━┻━┛ ┃ ┗━━━╸ ╻ ┃ ╹ ╻ ╹ ╻ ┗━━━━━━━╸.┗━━━┛ ┃
+┃     ┃           ┃       ┃     ┃   . . ┃     ┃ . . . ┃   ┃               ┃         ┃       ┃ ┃   ┃   ┃           . . .*┃
+┗━━━━━┻━━━━━━━━━━━┻━━━━━━━┻━━━━━┻━━━━━━━┻━━━━━┻━━━━━━━┻━━━┻━━━━━━━━━━━━━━━┻━━━━━━━━━┻━━━━━━━┻━┻━━━┻━━━┻━━━━━━━━━━━━━━━━━┛
 ````
 
 #### That's all for the moment!
