@@ -244,7 +244,7 @@ class Crawler:
 
 if __name__ == '__main__':
     # Set up a maze, and set an entrypoint and a goal.
-    maze_size = (60, 20)
+    maze_size = (40, 40)
     the_maze = Maze(*maze_size)
     # set an entry point and a goal.
     start = (0, 0)
