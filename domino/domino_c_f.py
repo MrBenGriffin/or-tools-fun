@@ -229,7 +229,7 @@ class DiGraphSolver:
                         h_list.append(ij_half)                            # is added to the half-list.
                     self.model.AddBoolOr(h_list)  # one of the possible points around xy is the A, OR xy is not B.
 
-        # connect domino tails to their heads.
+        # connect domino tails to their heads. ** There's something wrong going on around here!! **
         for dd in self.graph.values():                                   # half-dominoes are adjacent to each other.
             for (a, b), hd in dd['fixes'].items():                       # Likewise tails are adjacent to their heads.
                 for (x, y) in self.space:
@@ -259,7 +259,6 @@ class DiGraphSolver:
         solution_callback = SolutionCallback(self.graph, self.space, self.place)
         self.status = cp_solver.Solve(self.model)
         return self.summarise(cp_solver, solution_callback)
-
         # self.status = cp_solver.SearchForAllSolutions(self.model, solution_printer)
 
     def summarise(self, cp_solver, callback) -> bool:

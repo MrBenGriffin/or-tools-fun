@@ -1,5 +1,12 @@
 ## or-tools: Examples and Models
 
+First of all, everything I learned is thanks to the incredible patience and assistance 
+from many of the active members of the [or-tools forum](https://groups.google.com/u/1/g/or-tools-discuss).
+Big kudos would have to go to Laurent Perron, Xiang Chen, Hakan Kjellerstrand, and 'Mizux'. 
+The work here is most often theirs: I am mostly a fool.  However, I have heard that one may find inspiration in the strangest of places and maybe some of these solvers or systems might make some sense or even be of utility or inspiration to someone one day.
+
+
+### What do we have here?
 * [A Delegate Seating Problem](#seating---a-delegate-seating-problem)
 * [Chessboard Problem Solver](#chessboard---legal-pieces-puzzle)
 * [Polyomino Puzzle Solver](#polyomino-puzzle-solver)

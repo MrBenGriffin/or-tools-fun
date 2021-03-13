@@ -40,7 +40,7 @@ class SolutionPrinter(cp_model.CpSolverSolutionCallback):
     def on_solution_callback(self):
         # Many thousands of solutions.
         self.solutions += 1
-        # return True
+        return True
         result = []
         used = [arc for arc in self.arcs if self.Value(arc[2]) and arc[0] != arc[1]]
         arc = used[0]
@@ -131,15 +131,16 @@ class DominoDigraph:
         It's own 3 or any other 1 <-[1:3]->It's own 1 or to any other 3.
         The loop is closed, no dominoes are optional.
     """
+
     def __init__(self, size: int):
         # the primary objects
-        dominoes = set((x, y) for y in range(size+1) for x in range(y, size+1))
+        dominoes = set((x, y) for y in range(size + 1) for x in range(y, size + 1))
         # fix the rotations and store against each master
         fixed = {(a, b): {(a, b), (b, a)} for (a, b) in dominoes}
         # for each Domino; for each of it's fix; find those fixes from the Other dominoes which are potential tails.
         self.graph = {
             d: {
-                d_fix: [   # connect the other(o) potential dominoes as tails to each fix
+                d_fix: [  # connect the other(o) potential dominoes as tails to each fix
                     o_fix for o, o_fixes in fixed.items() if o != d for o_fix in o_fixes if o_fix[0] == d_fix[1]
                 ] for d_fix in d_fixes
             } for d, d_fixes in fixed.items()
@@ -155,8 +156,10 @@ def solve(problem):
 
 def solve_domino_digraph():
     #  2, 4, 6
-    problem = DominoDigraph(6)
-    solve(problem)
+    for n in [2, 4, 6, 7, 8, 9, 10, 11, 12]:
+        print(f'trying {n}...')
+        problem = DominoDigraph(n)
+        solve(problem)
 
 
 if __name__ == '__main__':
