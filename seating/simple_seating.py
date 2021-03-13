@@ -85,7 +85,7 @@ def create_data_model(data_model_file: str):
         sum([data['org_sess_sum'][o_idx][s_idx] for o_idx in data['org_sess_sum']]) for s_idx in range(sessions)
     ]
     data['orgs_sum'] = len(data['orgs'])
-    data['delegates_sum'] = sum([len(d.keys()) for d in data['orgs'].values()])
+    data['delegates_sum'] = sum([len(d.idx()) for d in data['orgs'].values()])
     choke_point = max(data['sess_sum'])
     if choke_point > data['seats_sum']:
         busy = [data['sessions'][i] for i, x in enumerate(data['sess_sum']) if x == choke_point]
@@ -93,7 +93,7 @@ def create_data_model(data_model_file: str):
         exit(0)
     return data
 
-def store_allocation(data, or_vars, tranche):
+def store_allocation(data, or_vars, solver):
     data['result'] = {}
     for s_idx, s_name in enumerate(data['sessions']):
         data['result'][s_name] = {}
@@ -101,10 +101,10 @@ def store_allocation(data, or_vars, tranche):
             data['result'][s_name][row] = []
             for c_idx in range(data['rows'][row]):
                 chair = None
-                for o_idx, o_name in enumerate(data['orgs'].keys()):
-                    for d_idx, d_name in enumerate(data['orgs'][o_name].keys()):
+                for o_idx, o_name in enumerate(data['orgs'].idx()):
+                    for d_idx, d_name in enumerate(data['orgs'][o_name].idx()):
                         if data['orgs'][o_name][d_name][s_idx] == 1 and \
-                                tranche.Value(or_vars[(d_idx, o_idx, s_idx, r_idx, c_idx)]) > 0:
+                                solver.Value(or_vars[(d_idx, o_idx, s_idx, r_idx, c_idx)]) > 0:
                             chair = d_name
                 data['result'][s_name][row].append(chair)
 
