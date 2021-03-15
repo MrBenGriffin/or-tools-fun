@@ -30,14 +30,15 @@ from ortools.sat.python import cp_model
 
 
 class SolutionCallback(cp_model.CpSolverSolutionCallback):
-    def __init__(self, graph, space, place):
+    def __init__(self, graph, space, place, fixes):
         cp_model.CpSolverSolutionCallback.__init__(self)
         self.solver = None
         self.graph = graph
         self.space = space
         self.place = place
+        self.fixes = fixes
         self.solutions = 0
-        self.show_circuit = False
+        self.show_circuit = True
         self.show_space = True
 
     def val(self, variable):
@@ -84,11 +85,14 @@ class SolutionCallback(cp_model.CpSolverSolutionCallback):
         """
         Derive grid size, based upon the min/max x,y values set in the space
         """
-        x1 = min(self.space, key=lambda a: a[0])[0]
-        y1 = min(self.space, key=lambda a: a[1])[1]
-        x2 = max(self.space, key=lambda a: a[0])[0]
-        y2 = max(self.space, key=lambda a: a[1])[1]
+        x1 = min(self.space, key=lambda l: l[0])[0]
+        y1 = min(self.space, key=lambda l: l[1])[1]
+        x2 = max(self.space, key=lambda l: l[0])[0]
+        y2 = max(self.space, key=lambda l: l[1])[1]
         mt = ('~', ' ')
+
+        fixed = [fix for fix in self.fixes if self.val(self.fixes[fix])]
+        placed = [pla for pla in self.place if self.val(self.place[pla])]
 
         """
         Compose grid dict, based upon solver values
@@ -191,7 +195,7 @@ class DiGraphSolver:
             As A and B are arbitrary, let's say that the circuit of the domino goes from A to B
             Each placement is therefore a boolean of [X,Y,A,B] or [X,Y,B,A]
             If there are numbers on the grid, that limits which variables can go on it, but that's all.
-            All placements are represented by X*Y*Fixes*2 boolVars.
+            All placements are represented by X*Y*Fixes boolVars.
         """
         # Set up the variables
         for dd in self.graph.values():                                   # for each domino directory..
@@ -200,47 +204,51 @@ class DiGraphSolver:
                 for (x, y) in self.space:
                     self.place[x, y, a, b] = self.model.NewBoolVar(f'fix {a,b} at {x,y}')  # the 'b' of this fix at x,y
 
-        # Basic sums equivalences.
-        for dd in self.graph.values():                                   # for each domino directory..
-            dom_group = []                                               # group all the vars for domino
-            for (a, b), hd in dd['fixes'].items():                       # for each fix..
-                for arc in [v[1] for v in hd['tail_vars']]:              # for (ab)->(tail) each tail (from b)
-                    self.model.AddImplication(arc, self.fixes[a, b])     # if the arc is true, the fix is true.
-                fix_group = []                                           # group xy vars over fix
-                for (x, y) in self.space:
-                    fix_group.append(self.place[x, y, a, b])             # add to the fix_group.
-                    self.model.AddImplication(self.place[x, y, a, b], self.fixes[a, b])  # fix(a,b) at x,y => fixes(a,b)
-                self.model.Add(sum(fix_group) == 3 - len(dd['fixes']))   # 2 fixes?, 1 of each; 1 fix?, we need 2.
-                dom_group += fix_group                                   # append the fix group for to the domino group.
-            self.model.Add(sum(dom_group) == 2)                          # 2 ends to each domino.
-        self.model.Add(sum(self.place.values()) == len(self.space))      # space is filled.
-        for (x, y) in self.space:                                        # one half-domino at each point in space.
-            all_at_xy = [self.place[k] for k in self.place if k[0] == x and k[1] == y]
-            self.model.Add(sum(all_at_xy) == 1)
+        # Connect the arcs to the fixes.
+        for dd in self.graph.values():  # for each domino directory..
+            for (a, b), hd in dd['fixes'].items():                       # for the head.ab of each fix
+                for (i, j), arc in [v for v in hd['tail_vars']]:         # for the tail.ij of each tail
+                    self.model.AddImplication(arc, self.fixes[a, b])      # if the arc is true, the head is true
+                    self.model.AddImplication(arc, self.fixes[i, j])      # if the arc is true, the tail is true
+                    self.model.AddImplication(self.fixes[a, b].Not(), arc.Not())      # !head => ! arc
+                    self.model.AddImplication(self.fixes[i, j].Not(), arc.Not())      # !tail => ! arc
 
-        # connect half-dominoes together
-        for dd in self.graph.values():                                   # half-dominoes are adjacent to each other.
-            for (a, b), hd in dd['fixes'].items():                       # Likewise tails are adjacent to their heads.
-                for (x, y) in self.space:                                # adj = legal and orthogonally adjacent to x, y
-                    adj = [ij for ij in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)] if ij in self.space]
-                    h_list = [self.place[x, y, a, b].Not()]               # domino's 'A' is next to the B.
-                    for (i, j) in adj:                                    # for each point adjacent to B...
-                        ij_half = self.place[i, j, b, a]                  # the 'A' half of the domino
-                        h_list.append(ij_half)                            # is added to the half-list.
-                    self.model.AddBoolOr(h_list)  # one of the possible points around xy is the A, OR xy is not B.
+        # Basic fix logic..
+        for (a, b), fix in self.fixes.items():
+            if a != b:
+                self.model.AddImplication(self.fixes[a, b], self.fixes[b, a].Not())
+                self.model.Add(sum([self.place[x, y, a, b] for x, y in self.space]) == 1)
+                self.model.Add(sum([self.place[x, y, b, a] for x, y in self.space]) == 1)
+            else:
+                self.model.Add(sum([self.place[x, y, a, b] for x, y in self.space]) == 2)
 
-        # connect domino tails to their heads. ** There's something wrong going on around here!! **
-        for dd in self.graph.values():                                   # half-dominoes are adjacent to each other.
-            for (a, b), hd in dd['fixes'].items():                       # Likewise tails are adjacent to their heads.
-                for (x, y) in self.space:
-                    adj = [ij for ij in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)] if ij in self.space]
-                    t_list = []                                           # the active tail is also next to B
-                    for (i, j) in adj:                                    # for each point adjacent to B...
-                        for ((p, q), tail) in hd['tail_vars']:            # for each tail at ij of the ab fix at x,y
-                            self.model.AddBoolAnd([self.fixes[a, b], self.fixes[p, q]]).OnlyEnforceIf(tail)
-                            self.model.AddImplication(self.place[i, j, p, q], self.fixes[p, q])  # the tail at x,y implies the tail
-                            t_list.append(self.place[i, j, p, q])         # add the potentials tails to the tails list.
-                    self.model.AddBoolOr(t_list).OnlyEnforceIf(self.place[x, y, a, b])
+        # Connect fixes to space.  Each space will either be the head or a tail of a fix.
+        for (x, y) in self.space:
+            self.model.Add(sum([self.place[x, y, a, b] for a, b in self.fixes]) == 1)  # with 1 at each..
+            for (a, b), fix in self.fixes.items():
+                adj = [ij for ij in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)] if ij in self.space]
+                halves = [self.place[x, y, a, b].Not()]
+                for (i, j) in adj:  # for each point adjacent to B...
+                    tmp = self.model.NewBoolVar('half')
+                    self.model.Add(self.place[x, y, a, b] == self.place[i, j, b, a]).OnlyEnforceIf(tmp)
+                    halves.append(tmp)
+                self.model.Add(sum(halves) == 1).OnlyEnforceIf(self.place[x, y, a, b])
+
+        # connect domino tails to their heads.
+        for dd in self.graph.values():  # for each domino directory..
+            for (a, b), hd in dd['fixes'].items():                       # for the head.ab of each fix
+                for (j, i), arc in [v for v in hd['tail_vars']]:         # for the tail.ij of each tail
+                    joins = []
+                    for (x, y) in self.space:
+                        for u, v in [uv for uv in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)] if uv in self.space]:
+                            tmp = self.model.NewBoolVar('join')
+                            self.model.AddImplication(self.fixes[j, i], self.place[u, v, i, j]).OnlyEnforceIf(tmp)
+                            self.model.Add(self.place[x, y, a, b] == self.place[u, v, i, j]).OnlyEnforceIf(tmp)
+                            self.model.AddImplication(
+                                self.place[x, y, a, b], self.place[u, v, i, j].Not()
+                            ).OnlyEnforceIf(tmp.Not())
+                            joins.append(tmp)
+                    self.model.Add(sum(joins) == 1).OnlyEnforceIf(arc)
 
     def setup(self):
         # Set the master pieces. they should all be used.
@@ -256,7 +264,7 @@ class DiGraphSolver:
         # cp_solver.parameters.linearization_level = 0
         # cp_solver.parameters.max_presolve_iterations = 1000
         # cp_solver.parameters.cp_model_probing_level = 1000
-        solution_callback = SolutionCallback(self.graph, self.space, self.place)
+        solution_callback = SolutionCallback(self.graph, self.space, self.place, self.fixes)
         self.status = cp_solver.Solve(self.model)
         return self.summarise(cp_solver, solution_callback)
         # self.status = cp_solver.SearchForAllSolutions(self.model, solution_printer)
