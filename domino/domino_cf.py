@@ -396,20 +396,28 @@ def solve_domino_digraph(scale):
         [2, n, 4, n, 4],
         [n, 0, n, 0, n]
     ]
-    db4_demo = [
-        [n, 4, n, 4, n],
-        [n, 3, n, 3, n],
-        [n, n, 2, n, n],
-        [n, 1, n, 1, n],
-        [n, 0, n, 0, n],
-        [n, 3, n, 4, n]
+
+    db4_demo = [          # PUZZLE                 SOLUTION
+                          # ╔═══╦═══╦═══╦═══╦═══╗  ╔═══╦═══════╦═══════╗
+        [n, 4, n, 4, n],  # ║   ║ 4 ║   ║ 4 ║   ║  ║ 4 ║ 4   4 ║ 4   0 ║
+                          # ╠═══╬═══╬═══╬═══╬═══╣  ║   ╠═══════╬═══╦═══╣
+        [n, 3, n, 3, n],  # ║   ║ 3 ║   ║ 3 ║   ║  ║ 1 ║ 3   3 ║ 3 ║ 0 ║
+                          # ╠═══╬═══╬═══╬═══╬═══╣  ╠═══╬═══════╣   ║   ║
+        [n, n, 2, n, n],  # ║   ║   ║ 2 ║   ║   ║  ║ 1 ║ 3   2 ║ 1 ║ 2 ║
+                          # ╠═══╬═══╬═══╬═══╬═══╣  ║   ╠═══════╬═══╬═══╣
+        [n, 1, n, 1, n],  # ║   ║ 1 ║   ║ 1 ║   ║  ║ 1 ║ 1   2 ║ 1 ║ 2 ║
+                          # ╠═══╬═══╬═══╬═══╬═══╣  ╠═══╬═══════╣   ║   ║
+        [n, 0, n, 0, n],  # ║   ║ 0 ║   ║ 0 ║   ║  ║ 0 ║ 0   0 ║ 0 ║ 2 ║
+                          # ╠═══╬═══╬═══╬═══╬═══╣  ║   ╠═══════╬═══╩═══╣
+        [n, 3, n, 4, n]   # ║   ║ 3 ║   ║ 4 ║   ║  ║ 3 ║ 3   4 ║ 4   2 ║
+                          # ╚═══╩═══╩═══╩═══╩═══╝  ╚═══╩═══════╩═══════╝
     ]
 
     space = Space(scale).space
     for (x, y) in space:
-        space[x, y] = db4_demo[y][x]
+        space[x, y] = db6_0001[y][x]
     solve(graph, space, False)  # True=Find every match. False=find first match.
 
 
 if __name__ == '__main__':
-    solve_domino_digraph(4)    # db6_0001 currently takes 80 seconds to find all, about 18secs to find first fit.
+    solve_domino_digraph(6)    # db6_0001 currently takes 80 seconds to find all, about 18secs to find first fit.
