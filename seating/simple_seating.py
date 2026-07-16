@@ -64,6 +64,7 @@
 
 """
 
+import sys
 import json
 from random import choices
 from ortools.sat.python import cp_model
@@ -90,7 +91,7 @@ def create_data_model(data_model_file: str):
     if choke_point > data['seats_sum']:
         busy = [data['sessions'][i] for i, x in enumerate(data['sess_sum']) if x == choke_point]
         print(f"Not enough seats ({data['seats_sum']}) for the session requests ({choke_point}) in session(s) {busy}")
-        exit(0)
+        sys.exit(0)
     return data
 
 def store_allocation(data, or_vars, solver):

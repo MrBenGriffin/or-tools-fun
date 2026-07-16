@@ -94,6 +94,7 @@
 """
 
 import json
+import sys
 from random import choices
 from ortools.sat.python import cp_model
 
@@ -176,7 +177,7 @@ def solve_row_tranches(data, tranche_seats: int, row_slack: int):
         store_row_tranches(data, solver, basis)
     else:
         print("solve_row_tranches failed.\n", solver.ResponseStats())
-        exit(0)
+        sys.exit(0)
 
 
 def store_tranche_orgs(data, solver, basis):
@@ -269,7 +270,7 @@ def solve_tranche_orgs(data, row_slack: int, row_force: int):
         store_tranche_orgs(data, solver, basis)
     else:
         print("solve_tranche_orgs failed.\n", solver.ResponseStats())
-        exit(0)
+        sys.exit(0)
 
 
 def create_data_model(data_model_file: str, seats_per_tranche: int = 60, row_slack: int = 10, row_force: int = 5):
@@ -325,7 +326,7 @@ def create_data_model(data_model_file: str, seats_per_tranche: int = 60, row_sla
     ]
     if max(data['sess_sum']) > data['seats_sum']:
         print("Not enough seats (", str(data['seats_sum']), ") for the session requests (", max(data['sess_sum']), ")")
-        exit(0)
+        sys.exit(0)
     solve_tranche_orgs(data, row_slack, row_force)
     data['results'] = {session: {row: [] for row in data['rows']} for session in data['sessions']}
     return data

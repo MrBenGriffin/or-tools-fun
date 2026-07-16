@@ -22,11 +22,11 @@
 
     This will generate obj/mtl 3D 'Wavefront' files of the solution.
 """
-import sys
 import numpy as np
 from ortools.sat.python import cp_model
 import open3d as o3d
 import copy
+
 
 class PolycubePuzzleSolver:
     def __init__(self):
@@ -34,7 +34,7 @@ class PolycubePuzzleSolver:
         self.status = cp_model.UNKNOWN
         self.solver = cp_model.CpSolver()
         self.solver.parameters.max_time_in_seconds = 800
-        self.solver.parameters.num_search_workers = 12
+        self.solver.parameters.num_search_workers = 20
         self.pieces = None
         self.space = None
         self.pos_items = None
@@ -155,7 +155,23 @@ class PolycubePuzzleSolver:
                 print(f"Solver ran out of time.")
             return False
 
-    def save(self, file_name: str = 'file'):
+    def print(self):
+        pos = {}
+        for name, fix, offs in self.result:
+            fx = np.array(self.pieces[name].fixed[fix]['pts'])
+            moved = list(fx + offs)
+            for cell in moved:
+                    pos[tuple(cell)] = name
+
+        xr = range(min(pt[0] for pt in pos),1+max(pt[0] for pt in pos))
+        yr = range(min(pt[1] for pt in pos),1+max(pt[1] for pt in pos))
+        zr = range(min(pt[2] for pt in pos),1+max(pt[2] for pt in pos))
+        for y in yr:
+            for z in zr:
+                print(''.join([pos[x,y,z] if (x,y,z) in pos else '*' for x in xr]))
+            print()
+
+    def save_obj(self, file_name: str = 'file'):
         from colorsys import hsv_to_rgb
         count = len(self.result)
         mesh_file = '# OBJ File: {file_name}\n# Material Count: {count}\n\n'
@@ -217,6 +233,15 @@ class PolycubePuzzleSolver:
         f.write(mesh_file)
         f.close()
 
+    def save_stl(self, file_name: str = 'file'):
+        for idx, thing in enumerate(self.result):
+            name, fix, offset = thing
+            model = copy.deepcopy(self.pieces[name].fixed[fix]['model'])
+            model.translate(offset)
+            model.scale(10,center=[0,0,0])  # suitable; 1 => 10 mm
+            o3d.io.write_triangle_mesh(f'{file_name}_{idx:02d}.stl',model)
+
+
 class Shape:
 
     def __init__(self, points: list, name: str = 'shape'):
@@ -226,7 +251,7 @@ class Shape:
         self.model()
 
     @staticmethod
-    def _normalise_pts(d:list):
+    def _normalise_pts(d: list):
         # calculate the boundary and the size of each dimension for a given voxel object
         # bring the object to be positive but as close to the origin as possible.
         lx, bx = min(x[0] for x in d), 1 + max(x[0] for x in d)
@@ -302,23 +327,23 @@ def main():
         'Z': [[0, 0, 0], [1, 0, 0], [1, 1, 0], [1, 2, 0], [2, 2, 0]],  # Z
 
         # 17 non-flat pentacubes
-        'xq':  [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1]],  # Square with a block on it.
-        'xc':  [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 0, 1], [0, 1, 1]],  # 13 - (broken)
-        'xp':  [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 2]],  # phallus
-        'xo':  [[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 1, 1], [1, 0, 1]],  # 4-legged octopus
-        'xe':  [[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 1, 1], [1, 1, 1]],  # elephant
-        'xy':  [[1, 0, 0], [1, 1, 0], [1, 2, 0], [0, 2, 0], [1, 1, 1]],  # Twisted Y pentomino
-        'xyy': [[1, 0, 0], [1, 1, 0], [1, 2, 0], [2, 2, 0], [1, 1, 1]],  # ẏ Twisted Y pentomino (mirror)
-        'xn':  [[0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 2, 1], [0, 2, 1]],  # Twisted N pentomino
-        'xnn': [[0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 2, 1], [1, 2, 0]],  # ṅ Twisted N pentomino (mirror)
-        'xu':  [[0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 0, 0], [0, 2, 1]],  # Twisted U pentomino
-        'xuu': [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 0, 1], [1, 2, 0]],  # ů Twisted U pentomino (mirror)
-        'xz':  [[0, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1], [1, 1, 2]],  # Twisted Z pentomino
-        'xzz': [[0, 0, 0], [0, 0, 1], [1, 0, 1], [1, 1, 1], [1, 1, 2]],  # ż Twisted Z pentomino (mirror)
-        'xw':  [[0, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 2]],  # Twisted W pentomino
-        'xww': [[0, 0, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1], [1, 0, 2]],  #  ẇ Twisted W pentomino (mirror)
-        'xf':  [[0, 0, 0], [0, 1, 1], [0, 0, 1], [1, 0, 1], [1, 0, 2]],  # Folded F pentomino
-        'xff': [[0, 0, 0], [1, 0, 1], [0, 0, 1], [0, 1, 1], [0, 1, 2]],  # ḟ Folded F pentomino (mirror)
+        'h':  [[0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0], [0, 0, 1]],  # Feathered Hat (sq with block on)
+        'c':  [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 0, 1], [0, 1, 1]],  # C cathedral
+        'p':  [[0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1], [0, 0, 2]],  # phallus
+        'o':  [[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 1, 1], [1, 0, 1]],  # 4-legged octopus
+        'e':  [[0, 0, 0], [0, 0, 1], [0, 0, 2], [0, 1, 1], [1, 1, 1]],  # elephant
+        'y':  [[1, 0, 0], [1, 1, 0], [1, 2, 0], [0, 2, 0], [1, 1, 1]],  # Twisted Y pentomino (signpost)
+        'ẏ':  [[1, 0, 0], [1, 1, 0], [1, 2, 0], [2, 2, 0], [1, 1, 1]],  # ẏ Twisted Y pentomino (signpost mirror)
+        'n':  [[0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 2, 1], [0, 2, 1]],  # Twisted N pentomino
+        'ṅ':  [[0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 2, 1], [1, 2, 0]],  # ṅ Twisted N pentomino (mirror)
+        'u':  [[0, 0, 0], [0, 1, 0], [0, 2, 0], [1, 0, 0], [0, 2, 1]],  # Twisted U pentomino
+        'ů':  [[0, 0, 0], [0, 1, 0], [0, 2, 0], [0, 0, 1], [1, 2, 0]],  # ů Twisted U pentomino (mirror)
+        'z':  [[0, 0, 0], [0, 0, 1], [0, 1, 1], [1, 1, 1], [1, 1, 2]],  # Twisted Z pentomino
+        'ż':  [[0, 0, 0], [0, 0, 1], [1, 0, 1], [1, 1, 1], [1, 1, 2]],  # ż Twisted Z pentomino (mirror)
+        'w':  [[0, 0, 0], [1, 0, 0], [0, 0, 1], [0, 1, 1], [0, 1, 2]],  # Twisted W pentomino
+        'ẇ':  [[0, 0, 0], [0, 1, 0], [0, 0, 1], [1, 0, 1], [1, 0, 2]],  # ẇ Twisted W pentomino (mirror)
+        'f':  [[0, 0, 0], [0, 1, 1], [0, 0, 1], [1, 0, 1], [1, 0, 2]],  # Folded F pentomino
+        'ḟ':  [[0, 0, 0], [1, 0, 1], [0, 0, 1], [0, 1, 1], [0, 1, 2]],  # ḟ Folded F pentomino (mirror)
     }
 
     finder = PolycubePuzzleSolver()
@@ -340,13 +365,14 @@ def main():
         'fill': problem_space,
         'use': {'I': 1, 'L': 1, 'P': 1, 'V': 1, 'W': 1, 'N': 1,
                 'U': 1, 'Y': 1, 'T': 1, 'X': 1, 'F': 1, 'Z': 1,
-                'xq': 1, 'xc': 1, 'xp': 1, 'xo': 1, 'xe': 1, 'xy': 1,
-                'xyy': 1, 'xn': 1, 'xnn': 1, 'xu': 1, 'xuu': 1, 'xz': 1,
-                'xzz': 1, 'xw': 1, 'xww': 1, 'xf': 1, 'xff': 1}
+                'h': 1, 'c': 1, 'p': 1, 'o': 1, 'e': 1, 'y': 1,
+                'ẏ': 1, 'n': 1, 'ṅ': 1, 'u': 1, 'ů': 1, 'z': 1,
+                'ż': 1, 'w': 1, 'ẇ': 1, 'f': 1, 'ḟ': 1}
     }
     finder.process(problem_shapes, puzzle)
     if finder.show():
-        finder.save(f'{x}x{y}x{z}_solution')
+        finder.print()
+        # finder.save_stl(f'{x}x{y}x{z}_solution')
 
 
 if __name__ == '__main__':

@@ -16,6 +16,6 @@ dist/
 .idea
 htmlcov/
 
-/output/
+output/
 
 .venv-x86/
