@@ -60,10 +60,8 @@ Usage:
 import argparse
 import time
 from collections import defaultdict
-
 import numpy as np
 from ortools.sat.python import cp_model
-
 from hex_hamiltonian import build_layer_graph, Counter
 
 
