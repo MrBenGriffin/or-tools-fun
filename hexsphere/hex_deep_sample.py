@@ -70,6 +70,7 @@ def translate(uuids, level, tables, axiom_pos):
     the totality test.
     """
     levels = [list(uuids)]
+    # This is a naive approach and will be replaced in hex9
     for k in range(level - 1, -1, -1):
         levels.append(ua.h9_cell_ancestor(levels[-1], k))
     levels.reverse()
