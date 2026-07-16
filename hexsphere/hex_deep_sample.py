@@ -42,8 +42,8 @@ import argparse
 import pickle
 import time
 from collections import defaultdict
-
 import numpy as np
+from hhg9.h9 import uuid_address as ua
 
 TABLES = 'output/h9curve_rowtables_L5c.pkl'
 CENTRE = (51.48, 0.0)                     # Greenwich Park, on the seam
@@ -69,7 +69,6 @@ def translate(uuids, level, tables, axiom_pos):
     Raises KeyError if the tables are incomplete at any step - that IS
     the totality test.
     """
-    from hhg9.h9 import uuid_address as ua
     levels = [list(uuids)]
     for k in range(level - 1, -1, -1):
         levels.append(ua.h9_cell_ancestor(levels[-1], k))
