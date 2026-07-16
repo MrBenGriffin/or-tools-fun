@@ -23,6 +23,35 @@ E.g. find a solution for 6 queens, 2 knights, and maximum (2) kings.
 import sys
 from ortools.sat.python import cp_model
 
+class MultiSolution(cp_model.CpSolverSolutionCallback):
+    """Print intermediate solutions."""
+
+    def __init__(self, vx, board_sz, query):
+        cp_model.CpSolverSolutionCallback.__init__(self)
+        self.__solution_count = 0
+        self.vars = vx
+        self.sz = board_sz
+        self.ch = query
+
+    def on_solution_callback(self):
+        self.__solution_count += 1
+        print(f'{self.__solution_count} solutions found so far\n')
+        colors = ('□■' * (1 + self.sz // 2))  # extra for the odd lines.
+        board = [[colors[x + y % 2] for x in range(self.sz)] for y in range(self.sz)]
+        for x in range(self.sz):
+            for y in range(self.sz):
+                for p in self.vars:
+                    if self.Value(self.vars[p][x,y]):
+                        board[x][y] = p
+
+        for y in board:
+            print(' ' + ''.join(y))
+        print()
+
+
+    def solution_count(self):
+        return self.__solution_count
+
 def chessboard(challenge:dict, library:dict, board_size:int):
     model = cp_model.CpModel()
 
@@ -49,34 +78,41 @@ def chessboard(challenge:dict, library:dict, board_size:int):
                         model.AddImplication(pv, q_moves[nx, ny].Not())
 
     maximising = False
-    for p,required in challenge.items():
+    for p, required in challenge.items():
         if required > 0:
             model.Add(sum(presence[p].values()) == required)
         else:
             model.Add(sum(presence[p].values()) >= 0)
             model.Maximize(sum((presence[p]).values()))
             maximising = True
+
     solver = cp_model.CpSolver()
-    solver.parameters.max_time_in_seconds = 60
-    solver.parameters.num_search_workers = 12
-    status = solver.Solve(model)
+    if maximising:
+        solver.parameters.num_search_workers = 12
+        solver.parameters.max_time_in_seconds = 600
+        status = solver.Solve(model)
+    else:
+        solver.parameters.max_time_in_seconds = 60000
+        solver.parameters.enumerate_all_solutions = True
+        solution_counter = MultiSolution(presence, board_size, challenge)
+        status = solver.Solve(model, solution_counter)
     if status in (cp_model.OPTIMAL, cp_model.FEASIBLE):
         if maximising:
             print(f"Solver places {int(solver.ObjectiveValue())} pieces in {solver.WallTime()}s")
+            colors = ('□■' * (1 + board_size // 2))  # extra for the odd lines.
+            board = [[colors[x + y % 2] for x in range(board_size)] for y in range(board_size)]
+            for x in range(board_size):
+                for y in range(board_size):
+                    for p in challenge:
+                        if solver.Value(presence[p][x,y]):
+                            board[x][y] = p
+            print()
+            for y in board:
+                print(' ' + ''.join(y))
+            print()
         else:
             print(f"Solved {challenge} in {solver.WallTime()}s")
-        colors = ('□■' * (1 + board_size // 2))  # extra for the odd lines.
-        board = [[colors[x + y % 2] for x in range(board_size)] for y in range(board_size)]
-        for x in range(board_size):
-            for y in range(board_size):
-                for p in challenge:
-                    if solver.Value(presence[p][x,y]):
-                        board[x][y] = p
 
-        print()
-        for y in board:
-            print(' ' + ''.join(y))
-        print()
     else:
         if status == cp_model.INFEASIBLE:
             print(f"Solver says the challenge '{challenge}' is infeasible after {solver.WallTime()}s.")
@@ -100,7 +136,7 @@ def main(board:int):
     }
     # the problem states how many of each piece must be on the board.
     # one piece may be 0, and then the solver will find the maximum for that piece.
-    challenge = {'♚': 0, '♛': 6, '♞': 2}   # two kings.
+    challenge = {'♛': 2,'♚': 2, '♞': 4, '♝':4, '♜':2}    # 8 queens
     chessboard(challenge, library, board)
 
 

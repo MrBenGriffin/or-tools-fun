@@ -41,6 +41,7 @@ class SolutionPrinter(cp_model.CpSolverSolutionCallback):
         # Many thousands of solutions.
         self.solutions += 1
         return True
+'''      
         result = []
         used = [arc for arc in self.arcs if self.Value(arc[2]) and arc[0] != arc[1]]
         arc = used[0]
@@ -53,7 +54,7 @@ class SolutionPrinter(cp_model.CpSolverSolutionCallback):
         if used:
             result.append(['unused:', used])
         print(f"{' '.join([str(x) for x in result])}")
-
+'''
 
 class DiGraphSolver:
 

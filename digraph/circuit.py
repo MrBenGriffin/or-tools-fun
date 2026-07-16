@@ -1,3 +1,4 @@
+# encoding: utf-8
 # Copyright 2021 Ben Griffin; All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +27,20 @@
     (3) Solves the minimum and maximum paths.
     (4) Solves (or fails) for seeking path-lengths from minimum to maximum steps long printing the result.
 """
+
+import json
+import random
+
+import numpy as np
+# from scipy.spatial import Delaunay, Voronoi, voronoi_plot_2d
+from shapely import Polygon, MultiPoint
+from shapely.ops import voronoi_diagram
+from shapely.plotting import plot_polygon, plot_points
+
+import networkx as nx
+import matplotlib.pyplot as plt
+from networkx import spring_layout
+
 
 from ortools.sat.python import cp_model
 
@@ -104,7 +119,7 @@ class DiGraphSolver:
             return True
         else:
             if self.status == cp_model.INFEASIBLE:
-                print(f"Challenge for {self.step_count} arc{'s ' if self.step_count > 1 else ' '}is infeasible after {cp_solver.WallTime()}s.")
+                print(f"Challenge for {self.step_count} arc{'s ' if self.step_count > 1 else ' '} is infeasible after {cp_solver.WallTime()}s.")
             else:
                 print(f"Solver ran out of time.")
             return False
@@ -121,7 +136,7 @@ class DiGraphSolver:
         self.step_count = len(self.result) - 1
 
     def show(self):
-        print(f"{'-'.join(self.result)}")
+        print(f'{self.result}')
 
 class RandomDigraph:
     """
@@ -145,6 +160,88 @@ class RandomDigraph:
         for key, value in self.nodes.items():
             print(f'{key}: {value}')
 
+class JsonPlanar:
+    """
+        Load a problem defined in a json object.
+        Nodes list neighbours n clockwise order.
+    """
+    def __init__(self, definition_file: str = 'planar.json'):
+        self.fn = None
+        self.nodes = {}
+        j_obj = {}
+        with open(definition_file, 'r') as infile:
+            j_obj = json.load(infile)
+            infile.close()
+        for k,v in j_obj.items():
+            self.nodes[int(k)] = list(v)
+        self.start = 1
+        self.stop = 21
+        self.min_p = None, None
+        self.max_p = None, None
+
+    def print_nodes(self):
+        for key, value in self.nodes.items():
+            print(f'{key}: {value}')
+
+    def draw(self, collapse_fn=None):
+        g = nx.PlanarEmbedding()
+        g.set_data(self.nodes)
+        pos = nx.planar_layout(g)
+        pts = np.array(list(pos.values()))
+        for g in range(5000):
+            if g % 100  == 0:
+                plt.figure(figsize=(28, 24))
+            points = MultiPoint(pts)
+            regions = voronoi_diagram(points)
+            regions.simplify(tolerance = 25, preserve_topology = True)
+            poly_list = regions.geoms
+            pxs,par = {},[]
+            if g % 100  == 0:
+                plot_points(points)
+            for i, poly in enumerate(poly_list):
+                if g % 100 == 0:
+                    plot_polygon(poly)
+                if regions.convex_hull.contains_properly(poly):
+                    pxs[i] = [poly.centroid.x, poly.centroid.y]
+                else:
+                    pts[i][0] = (poly.centroid.x - pts[i][0]) / 2
+                    pts[i][1] = (poly.centroid.y - pts[i][1]) / 2
+                par.append(poly.area)
+            for i in pxs:
+                pts[i][0] = pxs[i][0]
+                pts[i][1] = pxs[i][1]
+            if g % 100  == 0:
+                print(g, min(par))
+                plt.tight_layout()
+                plt.show()
+
+    def draw_old(self, collapse_fn=None):
+        plt.figure(figsize=(28, 24))
+        # g = nx.PlanarEmbedding()
+        # g.set_data(self.nodes)
+        # # g.edges[1000,2000]['length'] = 1000
+        # # g.edges[2000,3000]['length'] = 1000
+        # # g.edges[3000,4000]['length'] = 1000
+        # # g.edges[4000,1000]['length'] = 1000
+        # pos = nx.planar_layout(g)
+        # # pos[1000] = [0,10]
+        # # pos[2000] = [10,10]
+        # # pos[3000] = [10,0]
+        # # pos[4000] = [0,0]
+        # # pos = nx.spring_layout(g, pos=pos, k=0.5)
+        # pts = np.array(list(pos.values()))
+        # # tri = Delaunay(pts)
+        # vor = Voronoi(pts)
+        # for p in range(len(pts)):
+        #     pt = pts[p]
+        #     ri = vor.point_region[p]
+        #     re = vor.regions[ri]
+        #
+        # fig = voronoi_plot_2d(vor)
+        # # plt.axis('off')
+        plt.show()
+
+#
 def solve_with_steps(problem, steps, show) -> int:
     problem.steps = steps
     solver = DiGraphSolver(problem)
@@ -161,7 +258,12 @@ def solve_az_paths_of_a_random_digraph():
     max_steps = solve_with_steps(problem, 'max', False)
     for p in range(min_steps+1, max_steps+1):
         solve_with_steps(problem, p, True)
+def solve_az_paths_of_a_json_planar():
+    problem = JsonPlanar()
+    # max_steps = solve_with_steps(problem, 'max', False)
+    problem.draw()
 
 
 if __name__ == '__main__':
-    solve_az_paths_of_a_random_digraph()
+    # solve_az_paths_of_a_random_digraph()
+    solve_az_paths_of_a_json_planar()
